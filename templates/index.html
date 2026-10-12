@@ -7,12 +7,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="CashFlow">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#4F46E5">
+    <meta name="theme-color" content="#090d16">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon-192.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    <title>Expense & Income Tracker</title>
-    <!-- Google Fonts: Inter -->
+    <title>CashFlow • Personal Finance</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -22,7 +22,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
+<body class="dark-theme">
     <div class="app-container">
         <!-- Top App Bar -->
         <header class="app-header">
@@ -35,11 +35,13 @@
                     <p class="app-subtitle">Personal Finance Tracker</p>
                 </div>
             </div>
-            <div class="month-selector-wrapper">
-                <i data-lucide="calendar" class="calendar-icon"></i>
-                <select id="monthSelect" class="month-select" aria-label="Select month">
-                    <!-- Populated dynamically -->
-                </select>
+            <div class="header-right">
+                <div class="month-selector-wrapper">
+                    <i data-lucide="calendar" class="calendar-icon"></i>
+                    <select id="monthSelect" class="month-select" aria-label="Select month">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
             </div>
         </header>
 
@@ -49,7 +51,7 @@
             <section class="balance-card">
                 <div class="balance-header">
                     <span class="balance-label">Net Balance</span>
-                    <span id="savingsRateBadge" class="badge badge-neutral">0% saved</span>
+                    <span id="savingsRateBadge" class="badge badge-glow">0% saved</span>
                 </div>
                 <div id="netBalance" class="balance-amount">$0.00</div>
 
@@ -76,13 +78,107 @@
                 </div>
             </section>
 
+            <!-- Dynamic Smart Insight Banner -->
+            <div class="insight-banner">
+                <div class="insight-icon">
+                    <i data-lucide="sparkles"></i>
+                </div>
+                <div class="insight-text" id="insightText">
+                    Loading financial insight...
+                </div>
+            </div>
+
+            <!-- 1-Tap Quick Presets Section -->
+            <section class="presets-section">
+                <div class="presets-header">
+                    <span class="section-sublabel">⚡ 1-Tap Quick Presets</span>
+                </div>
+                <div class="presets-scroll">
+                    <button class="preset-chip" data-type="expense" data-cat="Food & Dining" data-amount="4.50" data-desc="Coffee">
+                        <span>☕</span>
+                        <div class="chip-text">
+                            <strong>Coffee</strong>
+                            <small>$4.50</small>
+                        </div>
+                    </button>
+                    <button class="preset-chip" data-type="expense" data-cat="Food & Dining" data-amount="12.00" data-desc="Lunch">
+                        <span>🍔</span>
+                        <div class="chip-text">
+                            <strong>Lunch</strong>
+                            <small>$12.00</small>
+                        </div>
+                    </button>
+                    <button class="preset-chip" data-type="expense" data-cat="Groceries" data-amount="50.00" data-desc="Supermarket">
+                        <span>🛒</span>
+                        <div class="chip-text">
+                            <strong>Groceries</strong>
+                            <small>$50.00</small>
+                        </div>
+                    </button>
+                    <button class="preset-chip" data-type="expense" data-cat="Transportation" data-amount="25.00" data-desc="Petrol / Grab">
+                        <span>⛽</span>
+                        <div class="chip-text">
+                            <strong>Transport</strong>
+                            <small>$25.00</small>
+                        </div>
+                    </button>
+                    <button class="preset-chip" data-type="expense" data-cat="Entertainment" data-amount="20.00" data-desc="Movies / Outing">
+                        <span>🎬</span>
+                        <div class="chip-text">
+                            <strong>Cinema</strong>
+                            <small>$20.00</small>
+                        </div>
+                    </button>
+                    <button class="preset-chip" data-type="expense" data-cat="Utilities & Bills" data-amount="80.00" data-desc="Bills & Wi-Fi">
+                        <span>⚡</span>
+                        <div class="chip-text">
+                            <strong>Utilities</strong>
+                            <small>$80.00</small>
+                        </div>
+                    </button>
+                    <button class="preset-chip chip-income" data-type="income" data-cat="Salary" data-amount="3500.00" data-desc="Salary">
+                        <span>💼</span>
+                        <div class="chip-text">
+                            <strong>Salary</strong>
+                            <small>+$3,500</small>
+                        </div>
+                    </button>
+                </div>
+            </section>
+
             <!-- Quick Action Bar -->
-            <div class="action-bar">
+            <div class="action-bar-grid">
                 <button id="openModalBtn" class="btn btn-primary btn-block">
                     <i data-lucide="plus-circle"></i>
                     <span>Log Transaction</span>
                 </button>
             </div>
+
+            <!-- Smart Monthly Budget Section -->
+            <section class="card section-card budget-card">
+                <div class="section-header flex-between">
+                    <h2 class="section-title">
+                        <i data-lucide="target"></i>
+                        <span>Monthly Budget Target</span>
+                    </h2>
+                    <button id="editBudgetBtn" class="btn-text">
+                        <i data-lucide="edit-3"></i> Set Target
+                    </button>
+                </div>
+                <div class="budget-meter">
+                    <div class="budget-numbers">
+                        <span id="budgetSpentText">$0 spent</span>
+                        <span id="budgetLimitText">of $1,500 target</span>
+                    </div>
+                    <div class="budget-track">
+                        <div id="budgetFill" class="budget-fill" style="width: 0%;"></div>
+                    </div>
+                    <div class="budget-meta">
+                        <span id="budgetPercentText">0% used</span>
+                        <span id="budgetRemainingText" class="remaining-highlight">$1,500 remaining</span>
+                    </div>
+                </div>
+            </section>
 
             <!-- Spending Breakdown / Analytics Section -->
             <section class="card section-card">
@@ -119,13 +215,29 @@
                     </div>
                 </div>
 
+                <!-- Live Search Input -->
+                <div class="search-box">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Search note or category..." autocomplete="off">
+                </div>
+
                 <div id="transactionsList" class="transactions-list">
                     <!-- Dynamic Transactions list -->
                 </div>
 
                 <div id="noTransactionsState" class="empty-placeholder hidden">
                     <i data-lucide="inbox" class="placeholder-icon"></i>
-                    <p>No transactions found for this period.</p>
+                    <p>No transactions found.</p>
+                </div>
+
+                <!-- Utilities row: Demo data seed & CSV Export -->
+                <div class="history-actions">
+                    <button id="seedDataBtn" class="btn btn-secondary btn-sm" title="Populate realistic demo transactions">
+                        <i data-lucide="database"></i> Load Sample Data
+                    </button>
+                    <a id="exportCsvBtn" href="/api/export-csv" class="btn btn-secondary btn-sm" title="Export transactions to Excel/CSV">
+                        <i data-lucide="download"></i> Export CSV
+                    </a>
                 </div>
             </section>
         </main>
@@ -135,8 +247,8 @@
             <div class="mobile-tip">
                 <i data-lucide="smartphone"></i>
                 <div>
-                    <strong>Open on your phone:</strong>
-                    <span class="host-url">http://<span id="serverIp">192.168.100.17</span>:5000</span>
+                    <strong>PWA Standalone Enabled:</strong>
+                    <span>Add to Home Screen for native app mode</span>
                 </div>
             </div>
         </footer>
@@ -221,6 +333,38 @@
                     <button type="submit" id="saveTxBtn" class="btn btn-primary">
                         <i data-lucide="check"></i> Save Record
                     </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Editing Budget -->
+    <div id="budgetModal" class="modal-overlay hidden">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h3 class="modal-title">Set Monthly Budget</h3>
+                <button id="closeBudgetModalBtn" class="modal-close" aria-label="Close">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <form id="budgetForm" class="transaction-form">
+                <div class="form-group">
+                    <label class="form-label" for="budgetInput">Monthly Spending Limit ($)</label>
+                    <div class="input-with-prefix">
+                        <span class="input-currency">$</span>
+                        <input 
+                            type="number" 
+                            id="budgetInput" 
+                            step="10" 
+                            min="10" 
+                            placeholder="1500" 
+                            required
+                        >
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="cancelBudgetBtn" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Target</button>
                 </div>
             </form>
         </div>

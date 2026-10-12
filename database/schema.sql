@@ -23,3 +23,10 @@ CREATE TABLE IF NOT EXISTS transactions (
 CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions (date);
 CREATE INDEX IF NOT EXISTS idx_transactions_type ON transactions (type);
 CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions (category_id);
+
+-- Budgets Table (Monthly target limit)
+CREATE TABLE IF NOT EXISTS budgets (
+    month TEXT PRIMARY KEY, -- Format: YYYY-MM
+    amount REAL NOT NULL CHECK (amount > 0)
+);
+
