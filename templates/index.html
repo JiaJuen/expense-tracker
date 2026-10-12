@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#4F46E5">
+    <title>Expense & Income Tracker</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top App Bar -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="brand-icon">
+                    <i data-lucide="wallet"></i>
+                </div>
+                <div>
+                    <h1 class="app-title">CashFlow</h1>
+                    <p class="app-subtitle">Personal Finance Tracker</p>
+                </div>
+            </div>
+            <div class="month-selector-wrapper">
+                <i data-lucide="calendar" class="calendar-icon"></i>
+                <select id="monthSelect" class="month-select" aria-label="Select month">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Balance Hero Card -->
+            <section class="balance-card">
+                <div class="balance-header">
+                    <span class="balance-label">Net Balance</span>
+                    <span id="savingsRateBadge" class="badge badge-neutral">0% saved</span>
+                </div>
+                <div id="netBalance" class="balance-amount">$0.00</div>
+
+                <!-- Cash Flow Summary Grid -->
+                <div class="cashflow-grid">
+                    <div class="flow-item flow-income">
+                        <div class="flow-icon">
+                            <i data-lucide="arrow-down-left"></i>
+                        </div>
+                        <div class="flow-info">
+                            <span class="flow-title">Total Income</span>
+                            <span id="totalIncome" class="flow-val">+$0.00</span>
+                        </div>
+                    </div>
+                    <div class="flow-item flow-expense">
+                        <div class="flow-icon">
+                            <i data-lucide="arrow-up-right"></i>
+                        </div>
+                        <div class="flow-info">
+                            <span class="flow-title">Total Expenses</span>
+                            <span id="totalExpense" class="flow-val">-$0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Action Bar -->
+            <div class="action-bar">
+                <button id="openModalBtn" class="btn btn-primary btn-block">
+                    <i data-lucide="plus-circle"></i>
+                    <span>Log Transaction</span>
+                </button>
+            </div>
+
+            <!-- Spending Breakdown / Analytics Section -->
+            <section class="card section-card">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i data-lucide="pie-chart"></i>
+                        <span>Expense Breakdown</span>
+                    </h2>
+                </div>
+                <div id="chartContainer" class="chart-container">
+                    <canvas id="categoryChart" height="200"></canvas>
+                </div>
+                <div id="categoryBars" class="category-bars">
+                    <!-- Dynamic Category list -->
+                </div>
+                <div id="noExpenseState" class="empty-placeholder hidden">
+                    <i data-lucide="check-circle" class="placeholder-icon"></i>
+                    <p>No expenses logged for this month yet.</p>
+                </div>
+            </section>
+
+            <!-- Transactions History Section -->
+            <section class="card section-card">
+                <div class="section-header flex-between">
+                    <h2 class="section-title">
+                        <i data-lucide="receipt"></i>
+                        <span>Transactions</span>
+                    </h2>
+                    <!-- Filter Tabs -->
+                    <div class="type-filter-tabs">
+                        <button class="filter-tab active" data-filter="all">All</button>
+                        <button class="filter-tab" data-filter="expense">Expense</button>
+                        <button class="filter-tab" data-filter="income">Income</button>
+                    </div>
+                </div>
+
+                <div id="transactionsList" class="transactions-list">
+                    <!-- Dynamic Transactions list -->
+                </div>
+
+                <div id="noTransactionsState" class="empty-placeholder hidden">
+                    <i data-lucide="inbox" class="placeholder-icon"></i>
+                    <p>No transactions found for this period.</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- Mobile Phone Access Card at bottom -->
+        <footer class="app-footer">
+            <div class="mobile-tip">
+                <i data-lucide="smartphone"></i>
+                <div>
+                    <strong>Open on your phone:</strong>
+                    <span class="host-url">http://<span id="serverIp">192.168.100.17</span>:5000</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal Form for Adding Transaction -->
+    <div id="transactionModal" class="modal-overlay hidden">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h3 class="modal-title">New Transaction</h3>
+                <button id="closeModalBtn" class="modal-close" aria-label="Close">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <form id="transactionForm" class="transaction-form">
+                <!-- Type Toggle: Expense / Income -->
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <div class="type-toggle-group">
+                        <label class="toggle-option">
+                            <input type="radio" name="txType" value="expense" checked>
+                            <span class="toggle-pill pill-expense">
+                                <i data-lucide="trending-down"></i> Expense
+                            </span>
+                        </label>
+                        <label class="toggle-option">
+                            <input type="radio" name="txType" value="income">
+                            <span class="toggle-pill pill-income">
+                                <i data-lucide="trending-up"></i> Income
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Amount Input -->
+                <div class="form-group">
+                    <label class="form-label" for="amountInput">Amount ($)</label>
+                    <div class="input-with-prefix">
+                        <span class="input-currency">$</span>
+                        <input 
+                            type="number" 
+                            id="amountInput" 
+                            name="amount" 
+                            step="0.01" 
+                            min="0.01" 
+                            placeholder="0.00" 
+                            required 
+                            autocomplete="off"
+                        >
+                    </div>
+                </div>
+
+                <!-- Category Select -->
+                <div class="form-group">
+                    <label class="form-label" for="categorySelect">Category</label>
+                    <select id="categorySelect" name="category_id" required>
+                        <!-- Populated based on Expense/Income -->
+                    </select>
+                </div>
+
+                <!-- Date Input -->
+                <div class="form-group">
+                    <label class="form-label" for="dateInput">Date</label>
+                    <input type="date" id="dateInput" name="date" required>
+                </div>
+
+                <!-- Description Input -->
+                <div class="form-group">
+                    <label class="form-label" for="descInput">Note / Description (Optional)</label>
+                    <input 
+                        type="text" 
+                        id="descInput" 
+                        name="description" 
+                        placeholder="e.g. Dinner, Grocery run, Freelance payment"
+                        maxlength="100"
+                    >
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="cancelModalBtn" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" id="saveTxBtn" class="btn btn-primary">
+                        <i data-lucide="check"></i> Save Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
