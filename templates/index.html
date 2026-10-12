@@ -88,63 +88,7 @@
                 </div>
             </div>
 
-            <!-- 1-Tap Quick Presets Section -->
-            <section class="presets-section">
-                <div class="presets-header">
-                    <span class="section-sublabel">⚡ 1-Tap Quick Presets</span>
-                </div>
-                <div class="presets-scroll">
-                    <button class="preset-chip" data-type="expense" data-cat="Food & Dining" data-amount="4.50" data-desc="Coffee">
-                        <span>☕</span>
-                        <div class="chip-text">
-                            <strong>Coffee</strong>
-                            <small>$4.50</small>
-                        </div>
-                    </button>
-                    <button class="preset-chip" data-type="expense" data-cat="Food & Dining" data-amount="12.00" data-desc="Lunch">
-                        <span>🍔</span>
-                        <div class="chip-text">
-                            <strong>Lunch</strong>
-                            <small>$12.00</small>
-                        </div>
-                    </button>
-                    <button class="preset-chip" data-type="expense" data-cat="Groceries" data-amount="50.00" data-desc="Supermarket">
-                        <span>🛒</span>
-                        <div class="chip-text">
-                            <strong>Groceries</strong>
-                            <small>$50.00</small>
-                        </div>
-                    </button>
-                    <button class="preset-chip" data-type="expense" data-cat="Transportation" data-amount="25.00" data-desc="Petrol / Grab">
-                        <span>⛽</span>
-                        <div class="chip-text">
-                            <strong>Transport</strong>
-                            <small>$25.00</small>
-                        </div>
-                    </button>
-                    <button class="preset-chip" data-type="expense" data-cat="Entertainment" data-amount="20.00" data-desc="Movies / Outing">
-                        <span>🎬</span>
-                        <div class="chip-text">
-                            <strong>Cinema</strong>
-                            <small>$20.00</small>
-                        </div>
-                    </button>
-                    <button class="preset-chip" data-type="expense" data-cat="Utilities & Bills" data-amount="80.00" data-desc="Bills & Wi-Fi">
-                        <span>⚡</span>
-                        <div class="chip-text">
-                            <strong>Utilities</strong>
-                            <small>$80.00</small>
-                        </div>
-                    </button>
-                    <button class="preset-chip chip-income" data-type="income" data-cat="Salary" data-amount="3500.00" data-desc="Salary">
-                        <span>💼</span>
-                        <div class="chip-text">
-                            <strong>Salary</strong>
-                            <small>+$3,500</small>
-                        </div>
-                    </button>
-                </div>
-            </section>
+
 
             <!-- Quick Action Bar -->
             <div class="action-bar-grid">
@@ -308,6 +252,19 @@
                     <select id="categorySelect" name="category_id" required>
                         <!-- Populated based on Expense/Income -->
                     </select>
+                </div>
+
+                <!-- Specific Details (appears when 'Other Expense' or 'Other Income' is selected) -->
+                <div id="specificExpenseGroup" class="form-group hidden highlight-field">
+                    <label class="form-label" for="specificExpenseInput">
+                        <span id="specificLabelText">Specific Expense Name *</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="specificExpenseInput" 
+                        placeholder="e.g. Gym membership, Haircut, Parking fee, Book"
+                        maxlength="100"
+                    >
                 </div>
 
                 <!-- Date Input -->

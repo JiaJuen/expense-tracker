@@ -39,6 +39,9 @@ const cancelModalBtn = document.getElementById("cancelModalBtn");
 const transactionModal = document.getElementById("transactionModal");
 const transactionForm = document.getElementById("transactionForm");
 const categorySelect = document.getElementById("categorySelect");
+const specificExpenseGroup = document.getElementById("specificExpenseGroup");
+const specificExpenseInput = document.getElementById("specificExpenseInput");
+const specificLabelText = document.getElementById("specificLabelText");
 const dateInput = document.getElementById("dateInput");
 const amountInput = document.getElementById("amountInput");
 const descInput = document.getElementById("descInput");
@@ -83,33 +86,6 @@ function setupEventListeners() {
         renderFilteredTransactions();
     });
 
-    // 1-Tap Quick Presets
-    document.querySelectorAll(".preset-chip").forEach((chip) => {
-        chip.addEventListener("click", () => {
-            const txType = chip.dataset.type;
-            const catName = chip.dataset.cat;
-            const amount = chip.dataset.amount;
-            const desc = chip.dataset.desc;
-
-            // Set radio
-            const radio = document.querySelector(`input[name="txType"][value="${txType}"]`);
-            if (radio) radio.checked = true;
-
-            populateCategoryOptions();
-
-            // Select matching category
-            const match = categoriesCache.find(c => c.name.toLowerCase() === catName.toLowerCase() && c.type === txType);
-            if (match) {
-                categorySelect.value = match.id;
-            }
-
-            amountInput.value = amount;
-            descInput.value = desc;
-
-            transactionModal.classList.remove("hidden");
-        });
-    });
-
     // Modal controls
     openModalBtn.addEventListener("click", () => {
         transactionForm.reset();
@@ -127,12 +103,15 @@ function setupEventListeners() {
         if (e.target === transactionModal) closeModal();
     });
 
-    // Type toggle change
+    // Type toggle change (Expense / Income)
     document.querySelectorAll('input[name="txType"]').forEach((radio) => {
         radio.addEventListener("change", () => {
             populateCategoryOptions();
         });
     });
+
+    // Category select change: check for "Other Expense" / "Other Income"
+    categorySelect.addEventListener("change", handleCategoryChange);
 
     // Transaction form submit
     transactionForm.addEventListener("submit", handleAddTransaction);
@@ -152,6 +131,28 @@ function setupEventListeners() {
 
     // Seed sample data
     seedDataBtn.addEventListener("click", handleSeedSampleData);
+}
+
+// When category changes, prompt for specific item if 'Other' is chosen
+function handleCategoryChange() {
+    const selectedCatId = parseInt(categorySelect.value, 10);
+    const selectedCat = categoriesCache.find(c => c.id === selectedCatId);
+    const catName = selectedCat ? selectedCat.name.toLowerCase() : "";
+
+    if (catName.includes("other expense") || catName.includes("other income")) {
+        specificExpenseGroup.classList.remove("hidden");
+        specificExpenseInput.required = true;
+        const isIncome = catName.includes("income");
+        specificLabelText.textContent = isIncome ? "What specific income is this? *" : "What specific expense is this? *";
+        specificExpenseInput.placeholder = isIncome 
+            ? "e.g. Sold laptop, Bonus, Cash gift, Tax refund" 
+            : "e.g. Gym membership, Haircut, Parking fee, Course textbook";
+        setTimeout(() => specificExpenseInput.focus(), 150);
+    } else {
+        specificExpenseGroup.classList.add("hidden");
+        specificExpenseInput.required = false;
+        specificExpenseInput.value = "";
+    }
 }
 
 // Format currency
@@ -191,6 +192,8 @@ function populateCategoryOptions() {
     categorySelect.innerHTML = filtered.map(c => `
         <option value="${c.id}">${c.name}</option>
     `).join("");
+
+    handleCategoryChange();
 }
 
 // Load Summary and Transactions
@@ -382,7 +385,13 @@ function renderFilteredTransactions() {
         const amountClass = isIncome ? "is-income" : "is-expense";
         const iconBg = isIncome ? "rgba(16, 185, 129, 0.18)" : "rgba(244, 63, 94, 0.18)";
         const iconColor = isIncome ? "#34d399" : "#fb7185";
-        const catName = tx.category_name || (isIncome ? "Income" : "Expense");
+        
+        const isOther = (tx.category_name || "").toLowerCase().includes("other");
+        // If it's an Other Expense with a note, display the specific item as title!
+        const titleName = (isOther && tx.description) ? tx.description : (tx.category_name || (isIncome ? "Income" : "Expense"));
+        const subtitleText = (isOther && tx.description) 
+            ? `${tx.category_name} • ${tx.date}` 
+            : `${tx.date}${tx.description ? ` • ${escapeHtml(tx.description)}` : ""}`;
         const iconName = tx.category_icon || (isIncome ? "arrow-down-left" : "arrow-up-right");
 
         return `
@@ -392,9 +401,9 @@ function renderFilteredTransactions() {
                         <i data-lucide="${iconName}"></i>
                     </div>
                     <div class="tx-details">
-                        <span class="tx-category">${escapeHtml(catName)}</span>
+                        <span class="tx-category">${escapeHtml(titleName)}</span>
                         <span class="tx-meta">
-                            ${tx.date}${tx.description ? ` • ${escapeHtml(tx.description)}` : ""}
+                            ${subtitleText}
                         </span>
                     </div>
                 </div>
@@ -419,12 +428,29 @@ async function handleAddTransaction(e) {
     const saveBtn = document.getElementById("saveTxBtn");
     saveBtn.disabled = true;
 
+    const selectedCatId = parseInt(categorySelect.value, 10);
+    const selectedCat = categoriesCache.find(c => c.id === selectedCatId);
+    const catName = selectedCat ? selectedCat.name.toLowerCase() : "";
+    const isOther = catName.includes("other expense") || catName.includes("other income");
+
+    let finalDesc = descInput.value.trim();
+    if (isOther) {
+        const specificName = specificExpenseInput.value.trim();
+        if (!specificName) {
+            showToast("Please specify what this item was for!");
+            specificExpenseInput.focus();
+            saveBtn.disabled = false;
+            return;
+        }
+        finalDesc = specificName + (finalDesc ? ` (${finalDesc})` : "");
+    }
+
     const payload = {
         amount: parseFloat(amountInput.value),
         type: document.querySelector('input[name="txType"]:checked').value,
-        category_id: parseInt(categorySelect.value, 10),
+        category_id: selectedCatId,
         date: dateInput.value,
-        description: descInput.value
+        description: finalDesc
     };
 
     try {
@@ -437,6 +463,7 @@ async function handleAddTransaction(e) {
         if (res.ok) {
             transactionForm.reset();
             dateInput.value = new Date().toISOString().split("T")[0];
+            specificExpenseGroup.classList.add("hidden");
             transactionModal.classList.add("hidden");
             showToast("Record added successfully!");
 

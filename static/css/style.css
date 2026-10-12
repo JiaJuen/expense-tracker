@@ -300,77 +300,22 @@ body.dark-theme {
     line-height: 1.4;
 }
 
-/* 1-Tap Presets */
-.presets-section {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+/* Highlight field for specific expense / income */
+.highlight-field {
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px dashed rgba(99, 102, 241, 0.45);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    animation: fadeInField 0.2s ease-out;
 }
 
-.section-sublabel {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    letter-spacing: 0.05em;
+@keyframes fadeInField {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.presets-scroll {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    scrollbar-width: none;
-}
-
-.presets-scroll::-webkit-scrollbar {
-    display: none;
-}
-
-.preset-chip {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    padding: 8px 12px;
-    border-radius: 12px;
-    cursor: pointer;
-    flex-shrink: 0;
-    color: var(--text-main);
-    transition: all 0.2s ease;
-}
-
-.preset-chip:hover, .preset-chip:active {
-    background: var(--bg-card-subtle);
-    border-color: var(--primary);
-    transform: translateY(-1px);
-}
-
-.preset-chip span {
-    font-size: 1.1rem;
-}
-
-.chip-text {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-}
-
-.chip-text strong {
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: var(--text-main);
-}
-
-.chip-text small {
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--expense-color);
-}
-
-.chip-income .chip-text small {
-    color: var(--income-color);
+.highlight-field .form-label {
+    color: #a5b4fc;
 }
 
 /* Action Buttons */
