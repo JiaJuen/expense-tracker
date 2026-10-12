@@ -869,14 +869,15 @@ body.dark-theme {
 .input-currency {
     position: absolute;
     left: 14px;
-    font-size: 1.3rem;
+    font-size: 1.05rem;
     font-weight: 800;
     color: var(--text-muted);
+    letter-spacing: -0.02em;
 }
 
 .input-with-prefix input {
-    padding-left: 36px;
-    font-size: 1.3rem;
+    padding-left: 50px;
+    font-size: 1.25rem;
     font-weight: 800;
 }
 

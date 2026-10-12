@@ -213,17 +213,17 @@ def get_summary():
     # Dynamic Financial Insight generator
     savings_rate = round((net_balance / total_income * 100) if total_income > 0 else 0, 1)
     if total_expense == 0 and total_income == 0:
-        insight = "🌱 Start your month strong! Tap a quick preset below to log your first record."
+        insight = "🌱 Start your month strong! Tap '+ Log Transaction' to record your first entry."
     elif budget_amount and total_expense > budget_amount:
         over = round(total_expense - budget_amount, 2)
-        insight = f"⚠️ Budget Alert: You have exceeded your ${budget_amount:,.0f} budget by ${over:,.2f}."
+        insight = f"⚠️ Budget Alert: You have exceeded your RM {budget_amount:,.0f} budget by RM {over:,.2f}."
     elif total_income > 0 and savings_rate >= 40:
         insight = f"🔥 Excellent discipline! You are saving {savings_rate}% of your income this month."
     elif category_breakdown:
         top = category_breakdown[0]
-        insight = f"💡 Top expense: {top['name']} makes up {top['percentage']}% (${top['total']:,.2f}) of your spending."
+        insight = f"💡 Top expense: {top['name']} makes up {top['percentage']}% (RM {top['total']:,.2f}) of your spending."
     else:
-        insight = f"📊 Net cash flow is ${net_balance:,.2f} for this month."
+        insight = f"📊 Net cash flow is RM {net_balance:,.2f} for this month."
 
     # Available months list for dropdown selector
     months_cursor = conn.execute(
@@ -338,7 +338,7 @@ def export_csv():
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["ID", "Date", "Type", "Category", "Amount ($)", "Description"])
+    writer.writerow(["ID", "Date", "Type", "Category", "Amount (RM)", "Description"])
     for r in rows:
         writer.writerow([r["id"], r["date"], r["type"].capitalize(), r["category"] or "Uncategorized", f"{r['amount']:.2f}", r["description"] or ""])
 

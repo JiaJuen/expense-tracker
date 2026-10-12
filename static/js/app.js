@@ -155,13 +155,13 @@ function handleCategoryChange() {
     }
 }
 
-// Format currency
+// Format currency as Ringgit Malaysia (RM)
 function formatCurrency(amount) {
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 2
-    }).format(amount);
+    const num = Math.abs(Number(amount) || 0);
+    return "RM " + num.toLocaleString("en-MY", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
 }
 
 // Show Toast
@@ -212,7 +212,11 @@ async function fetchSummary() {
 
         // Balance Hero Card
         const balance = data.net_balance || 0;
-        netBalanceEl.textContent = (balance < 0 ? "-" : "") + formatCurrency(Math.abs(balance));
+        const prefix = balance < 0 ? "-RM " : "RM ";
+        netBalanceEl.textContent = prefix + Math.abs(balance).toLocaleString("en-MY", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
         netBalanceEl.style.color = balance < 0 ? "#fb7185" : "#ffffff";
 
         totalIncomeEl.textContent = `+${formatCurrency(data.total_income || 0)}`;
